@@ -1,10 +1,10 @@
-import openai
+from openai import OpenAI
 import os
 import re
 import time
 
 # Set your OpenAI API key
-openai.api_key = os.getenv("OPENAI_KEY")  # Ensure OPENAI_KEY is set in your environment
+client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
 
 # Known transcription errors and their corrections
 CORRECTION_MAP = {
@@ -20,7 +20,7 @@ def apply_known_corrections(text):
     return text
 
 # Function to split text into chunks with overlap
-def split_into_chunks(text, chunk_size=500, overlap=50):
+def split_into_chunks(text, chunk_size=500, overlap=0):
     words = text.split()
     chunks = []
     start = 0
@@ -34,19 +34,18 @@ def split_into_chunks(text, chunk_size=500, overlap=50):
 # Function to correct text using OpenAI API
 def correct_text_with_openai(text):
     prompt = (
-        "You are an expert in Russian language and Buddhist terminology. Correct transcription errors in the following Russian text, ensuring proper spelling and terminology related to Buddha and Buddhist texts. Maintain the original meaning and context. For example, 'satie ботаны' should be 'Сатипаттханы', 'Гуда' should be 'Будда'. Return only the corrected text.\n\n"
+        "You are an expert in Russian language and Buddhist terminology. Correct transcription errors in the following Russian text, ensuring proper spelling and terminology related to Buddha and Buddhist texts. Maintain the original meaning and context. For example, 'satie ботаны' should be 'Сатипаттханы', 'Гуда' should be 'Будда'. Also, the author users filler words like 'да', 'так сказать', 'то есть', 'ну', 'вот', etc. which should be removed. It should be nice to read the text. Return only the corrected text.\n\n"
         f"Text:\n{text}"
     )
-    
+
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # Switch to "gpt-3.5-turbo" if preferred
-            messages=[
-                {"role": "system", "content": "You are a precise text corrector."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1500,  # Adjust based on chunk size
-            temperature=0.3  # Low temperature for precise corrections
+        response = client.chat.completions.create(model="gpt-4",  # Switch to "gpt-3.5-turbo" if preferred
+        messages=[
+            {"role": "system", "content": "You are a precise text corrector."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1500,  # Adjust based on chunk size
+        temperature=0.3
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
@@ -72,7 +71,7 @@ def process_text_file(input_file, output_file):
         return
 
     # Apply known corrections first
-    text = apply_known_corrections(text)
+    # text = apply_known_corrections(text)
 
     # Split text into chunks
     chunks = split_into_chunks(text)
@@ -89,18 +88,17 @@ def process_text_file(input_file, output_file):
     corrected_text = " ".join(corrected_chunks)
 
     # Split into paragraphs
-    paragraphs = split_into_paragraphs(corrected_text)
+    # paragraphs = split_into_paragraphs(corrected_text)
 
     # Save to output file
     try:
         with open(output_file, 'w', encoding='utf-8') as f:
-            for para in paragraphs:
-                f.write(para + "\n\n")
+            f.write(corrected_text + "\n\n")
         print(f"Corrected text saved to {output_file}")
     except Exception as e:
         print(f"Error writing file: {e}")
 
 # Example usage
-input_file = "input_russian_text.txt"  # Replace with your input file path
-output_file = "corrected_russian_text.txt"  # Output file path
+input_file = "sample-full-transcript-no-timestamps.txt"  # Replace with your input file path
+output_file = "corrected_russian_text-1.txt"  # Output file path
 process_text_file(input_file, output_file)
