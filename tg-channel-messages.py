@@ -49,6 +49,12 @@ async def get_recent_channel_messages():
                 print(f"Text: {msg.text if msg.text else '[No text content]'}")
                 if msg.views:
                     print(f"Views: {msg.views}")
+                #  Download media if available
+                # if msg.media and hasattr(msg.media, 'document') and msg.media.document:
+                #     if msg.media.document.mime_type == 'audio/mpeg':
+                #         file_name = msg.media.document.attributes[1].file_name if len(msg.media.document.attributes) > 1 else 'audio.mp3'
+                #         print(f"Audio File: {file_name}")
+                #         await client.download_media(msg.media, file_name)
                 print("-" * 40)
         else:
             print(f"No messages found in '{CHANNEL_USERNAME}' or channel is empty.")
