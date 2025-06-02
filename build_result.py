@@ -34,7 +34,7 @@ def split_into_chunks(text, chunk_size=500, overlap=0):
 # Function to correct text using OpenAI API
 def correct_text_with_openai(text):
     prompt = (
-        "You are an expert in Russian language and Buddhist terminology. Correct transcription errors in the following Russian text, ensuring proper spelling and terminology related to Buddha and Buddhist texts. Maintain the original meaning and context. For example, 'satie ботаны' should be 'Сатипаттханы', 'Гуда' should be 'Будда'. Also, the author users filler words like 'да', 'так сказать', 'то есть', 'ну', 'вот', etc. which should be removed. It should be nice to read the text. Return only the corrected text.\n\n"
+        "You are an expert in Russian language and Buddhist terminology. Correct transcription errors in the following Russian text, ensuring proper spelling and terminology related to Buddha and Buddhist texts. Maintain the original meaning and context. For example, 'satie ботаны' should be 'Сатипаттханы', 'Гуда' should be 'Будда'. Also, the author users filler words like 'да', 'так сказать', 'то есть', 'ну', 'вот', etc. which should be removed. It should be nice to read the text. Split the result text into paragraphs. Return only the corrected text.\n\n"
         f"Text:\n{text}"
     )
 
@@ -99,6 +99,6 @@ def process_text_file(input_file, output_file):
         print(f"Error writing file: {e}")
 
 # Example usage
-input_file = "sample-full-transcript-no-timestamps.txt"  # Replace with your input file path
-output_file = "corrected_russian_text-1.txt"  # Output file path
+input_file = "./audio-files/test/240921_Абсолют_Сатипаттхана_медитация.txt"  # Replace with your input file path
+output_file = "./audio-files/test/beautified_240921_Абсолют_Сатипаттхана_медитация.txt"  # Output file path
 process_text_file(input_file, output_file)
