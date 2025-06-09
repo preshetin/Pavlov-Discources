@@ -6,6 +6,10 @@ import time
 # Set your OpenAI API key
 client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
 
+# 'gpt-4' is too expensive.
+# gpt-4o-mini $0.15 / 1m input tokens, $0.60 / 1m output tokens
+MODEL_NAME = "gpt-4o-mini" 
+
 # Known transcription errors and their corrections
 CORRECTION_MAP = {
     "satie ботаны": "Сатипаттханы",
@@ -33,18 +37,25 @@ def split_into_chunks(text, chunk_size=500, overlap=0):
 
 # Function to correct text using OpenAI API
 def correct_text_with_openai(text):
-    prompt = (
-        "You are an expert in Russian language and Buddhist terminology. Correct transcription errors in the following Russian text, ensuring proper spelling and terminology related to Buddha and Buddhist texts. Maintain the original meaning and context. For example, 'satie ботаны' should be 'Сатипаттханы', 'Гуда' should be 'Будда'. Also, the author users filler words like 'да', 'так сказать', 'то есть', 'ну', 'вот', etc. which should be removed. It should be nice to read the text. Split the result text into paragraphs. Return only the corrected text.\n\n"
-        f"Text:\n{text}"
+    system_prompt = (
+        "You are an expert in Russian language and Buddhist terminology. "
+        "Correct transcription errors in the following Russian text, ensuring "
+        "proper spelling and terminology related to Buddha and Buddhist texts. "
+        "Maintain the original meaning and context. "
+        "For example, 'satie ботаны' should be 'Сатипаттханы', 'Гуда' should be 'Будда'. "
+        "Also, the author users filler words like 'да', 'так сказать', 'то есть', 'ну', 'вот', etc. "
+        "which should be removed. It should be nice to read the text. "
+        "Split the result text into paragraphs. Return only the corrected text."
     )
 
     try:
-        response = client.chat.completions.create(model="gpt-4",  # Switch to "gpt-3.5-turbo" if preferred
+        response = client.chat.completions.create(model=MODEL_NAME,  # Switch to "gpt-3.5-turbo" if preferred
         messages=[
-            {"role": "system", "content": "You are a precise text corrector."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": text}
         ],
         max_tokens=1500,  # Adjust based on chunk size
+        timeout=600,
         temperature=0.3
         )
         return response.choices[0].message.content.strip()
@@ -99,6 +110,17 @@ def process_text_file(input_file, output_file):
         print(f"Error writing file: {e}")
 
 # Example usage
-input_file = "./audio-files/test/240921_Абсолют_Сатипаттхана_медитация.txt"  # Replace with your input file path
-output_file = "./audio-files/test/beautified_240921_Абсолют_Сатипаттхана_медитация.txt"  # Output file path
-process_text_file(input_file, output_file)
+if __name__ == "__main__":
+    import sys
+    
+    if len(sys.argv) != 2:
+        print("Usage: python build_result.py <input_file_path>")
+        sys.exit(1)
+        
+    input_file = sys.argv[1]
+    # Generate output file path by adding model name prefix to the input filename
+    input_path = os.path.dirname(input_file)
+    input_filename = os.path.basename(input_file)
+    output_file = os.path.join(input_path, f"{MODEL_NAME}_{input_filename}")
+    
+    process_text_file(input_file, output_file)
