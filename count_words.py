@@ -1,4 +1,5 @@
 import os
+import argparse
 
 def count_words(filename):
     """Counts the number of words in a text file.
@@ -21,8 +22,13 @@ def count_words(filename):
         print(f"An error occurred: {e}")
         return None
 
+# usage:
+# python count_words.py "./audio-files/test/sample.txt" 
 if __name__ == "__main__":
-    filename = "updated.txt"  # Replace with the actual filename if different
-    word_count = count_words(filename)
+    parser = argparse.ArgumentParser(description='Count words in a text file.')
+    parser.add_argument('filepath', type=str, help='Path to the text file')
+    args = parser.parse_args()
+    
+    word_count = count_words(args.filepath)
     if word_count is not None:
-        print(f"The file '{filename}' contains {word_count} words.")
+        print(f"The file '{args.filepath}' contains {word_count} words.")
