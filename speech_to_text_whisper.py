@@ -14,7 +14,7 @@ def speech_to_text(audio_file):
 
         # Transcribe the audio
         print(f"Transcribing {audio_file}...")
-        result = model.transcribe(audio_file)
+        result = model.transcribe(audio_file, fp16=False, language="ru")
         transcript = result["text"]
 
         # Create the text file path
@@ -24,7 +24,7 @@ def speech_to_text(audio_file):
         with open(text_file, "w", encoding="utf-8") as f:
             f.write(transcript)
 
-        print(f"Transcription saved to {text_file}")
+        print(f"Transcription saved to {text_file}\n")
 
     except Exception as e:
         print(f"Error processing {audio_file}: {e}")
@@ -42,6 +42,6 @@ def process_directory(directory):
             speech_to_text(audio_file)
 
 if __name__ == "__main__":
-    audio_directory = "./audio-files/test/"  # Replace with the actual path to your directory
+    audio_directory = "./audio-files/2-2024-08/"  # Replace with the actual path to your directory
     process_directory(audio_directory)
     print("Finished processing all files.")
