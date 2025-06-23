@@ -114,13 +114,27 @@ if __name__ == "__main__":
     import sys
     
     if len(sys.argv) != 2:
-        print("Usage: python build_result.py <input_file_path>")
+        print("Usage: python build_result.py <folder_path>")
         sys.exit(1)
         
-    input_file = sys.argv[1]
-    # Generate output file path by adding model name prefix to the input filename
-    input_path = os.path.dirname(input_file)
-    input_filename = os.path.basename(input_file)
-    output_file = os.path.join(input_path, f"{MODEL_NAME}_{input_filename}")
+    folder_path = sys.argv[1]
     
-    process_text_file(input_file, output_file)
+    if not os.path.isdir(folder_path):
+        print(f"Error: {folder_path} is not a directory")
+        sys.exit(1)
+    
+    # Process all txt files in the folder
+    txt_files = [f for f in os.listdir(folder_path) if f.endswith('.txt')]
+    
+    if not txt_files:
+        print(f"No .txt files found in {folder_path}")
+        sys.exit(0)
+    
+    print(f"Found {len(txt_files)} .txt files to process")
+    
+    for txt_file in txt_files:
+        input_file = os.path.join(folder_path, txt_file)
+        output_file = os.path.join(folder_path, f"{MODEL_NAME}_{txt_file}")
+        
+        print(f"\nProcessing: {txt_file}")
+        process_text_file(input_file, output_file)
