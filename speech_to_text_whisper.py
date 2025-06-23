@@ -1,5 +1,6 @@
 import whisper
 import os
+import sys
 
 def speech_to_text(audio_file):
     """
@@ -42,6 +43,9 @@ def process_directory(directory):
             speech_to_text(audio_file)
 
 if __name__ == "__main__":
-    audio_directory = "./audio-files/2-2024-08/"  # Replace with the actual path to your directory
+    if len(sys.argv) != 2:
+        print("Usage: python speech_to_text_whisper.py <audio_directory>")
+        sys.exit(1)
+    audio_directory = sys.argv[1]
     process_directory(audio_directory)
     print("Finished processing all files.")
